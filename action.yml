@@ -1,6 +1,6 @@
 name: 'pre-commit with uv'
 description: 'Run pre-commit hooks using uv for fast Python environment management'
-author: 'jk'
+author: 'Jakub3628800'
 
 branding:
   icon: 'check-circle'

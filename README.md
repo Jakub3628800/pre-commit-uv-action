@@ -17,7 +17,7 @@ This action uses:
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: jk/pre-commit-uv-action@v1
+- uses: Jakub3628800/pre-commit-uv-action@v0.0.1
   with:
     extra_args: --all-files
 ```
@@ -27,7 +27,7 @@ This action uses:
 For local hooks that need your project's code:
 
 ```yaml
-- uses: jk/pre-commit-uv-action@v1
+- uses: Jakub3628800/pre-commit-uv-action@v0.0.1
   with:
     command: run-venv
     extra_args: --all-files
@@ -36,7 +36,7 @@ For local hooks that need your project's code:
 ### Auto-update with PR
 
 ```yaml
-- uses: jk/pre-commit-uv-action@v1
+- uses: Jakub3628800/pre-commit-uv-action@v0.0.1
   with:
     command: autoupdate
     pr-assignees: username
