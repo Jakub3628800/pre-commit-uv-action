@@ -1,0 +1,43 @@
+name: Test Action
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-run:
+    name: Test isolated mode
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run pre-commit (isolated)
+        uses: ./
+        with:
+          command: run
+          extra_args: --all-files
+
+  test-run-venv:
+    name: Test with project environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run pre-commit (with venv)
+        uses: ./
+        with:
+          command: run-venv
+          extra_args: --all-files
+
+  test-autoupdate:
+    name: Test autoupdate (dry-run)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run pre-commit autoupdate
+        uses: ./
+        with:
+          command: autoupdate

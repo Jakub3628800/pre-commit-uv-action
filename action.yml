@@ -1,0 +1,108 @@
+name: 'pre-commit with uv'
+description: 'Run pre-commit hooks using uv for fast Python environment management'
+author: 'jk'
+
+branding:
+  icon: 'check-circle'
+  color: 'purple'
+
+inputs:
+  command:
+    description: 'Command to run: run (isolated), run-venv (with project deps), or autoupdate (create PR)'
+    required: false
+    default: 'run'
+  extra_args:
+    description: 'Arguments to pass to pre-commit run (e.g., --all-files, hook-id)'
+    required: false
+    default: ''
+  pr-title:
+    description: 'PR title for autoupdate command'
+    required: false
+    default: 'chore: Pre-commit auto-update'
+  pr-body:
+    description: 'PR body for autoupdate command'
+    required: false
+    default: 'Automated update of pre-commit hooks'
+  pr-branch:
+    description: 'PR branch name for autoupdate command'
+    required: false
+    default: 'pre-commit-autoupdate'
+  pr-base:
+    description: 'PR base branch for autoupdate command'
+    required: false
+    default: 'main'
+  pr-labels:
+    description: 'Comma-separated PR labels for autoupdate command'
+    required: false
+    default: 'dependencies,github_actions'
+  pr-assignees:
+    description: 'Comma-separated PR assignees for autoupdate command'
+    required: false
+    default: ''
+  pr-reviewers:
+    description: 'Comma-separated PR reviewers for autoupdate command'
+    required: false
+    default: ''
+  pr-sign-commits:
+    description: 'Sign commits for autoupdate PR'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+
+    - name: Cache pre-commit environments
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-${{ runner.os }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
+        restore-keys: |
+          pre-commit-${{ runner.os }}-
+
+    - name: Run pre-commit (isolated mode)
+      if: inputs.command == 'run'
+      shell: bash
+      run: |
+        echo "Running pre-commit in isolated mode..."
+        uv tool run pre-commit run ${{ inputs.extra_args }}
+
+    - name: Run pre-commit (with project environment)
+      if: inputs.command == 'run-venv'
+      shell: bash
+      run: |
+        echo "Running pre-commit with project environment..."
+        uv sync
+        uv run pre-commit run ${{ inputs.extra_args }}
+
+    - name: Run pre-commit autoupdate
+      if: inputs.command == 'autoupdate'
+      shell: bash
+      run: |
+        echo "Running pre-commit autoupdate..."
+        uv tool run pre-commit autoupdate
+
+    - name: Check for changes
+      if: inputs.command == 'autoupdate'
+      id: changes
+      shell: bash
+      run: |
+        git add .pre-commit-config.yaml
+        git diff --staged --quiet || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+    - name: Create Pull Request
+      if: inputs.command == 'autoupdate' && steps.changes.outputs.changed == 'true'
+      uses: peter-evans/create-pull-request@v7
+      with:
+        title: ${{ inputs.pr-title }}
+        body: ${{ inputs.pr-body }}
+        branch: ${{ inputs.pr-branch }}
+        base: ${{ inputs.pr-base }}
+        labels: ${{ inputs.pr-labels }}
+        sign-commits: ${{ inputs.pr-sign-commits }}
+        assignees: ${{ inputs.pr-assignees }}
+        reviewers: ${{ inputs.pr-reviewers }}
