@@ -12,32 +12,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Run pre-commit (isolated)
-        uses: ./
+      - uses: astral-sh/setup-uv@v7
         with:
-          command: run
-          extra_args: --all-files
+          enable-cache: true
+      - uses: ./
 
-  test-run-venv:
-    name: Test with project environment
+  test-run-specific:
+    name: Test with specific args
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Run pre-commit (with venv)
-        uses: ./
+      - uses: astral-sh/setup-uv@v7
         with:
-          command: run-venv
-          extra_args: --all-files
+          enable-cache: true
+      - uses: ./
+        with:
+          extra_args: check-yaml
 
   test-autoupdate:
-    name: Test autoupdate (dry-run)
+    name: Test autoupdate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Run pre-commit autoupdate
-        uses: ./
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - uses: ./
         with:
           command: autoupdate
